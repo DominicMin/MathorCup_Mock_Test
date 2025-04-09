@@ -4,7 +4,9 @@ mindmap-plugin: basic
 
 
 ## 思路整理
+<<<<<<< HEAD
 ![思维导图](mindmap.png)
+=======
 - 题目中的基本元素
     - 物流场地
         - 会停用
