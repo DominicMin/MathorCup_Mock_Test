@@ -1,0 +1,15 @@
+clear;
+cla;
+date=[31 28 31 30 31 30 31 31 30 31 30 31];
+date2=[date,date];
+cumdate=cumsum(date2);
+T=readtable("附件1：物流网络历史货量数据.xlsx","VariableNamingRule","preserve");
+x=T(strcmp(T.("场地1"),"DC14"),:);
+y=x(strcmp(x.("场地2"),"DC10"),:);
+bar(y.("货量"));
+hold on;
+plot(y.("货量"));
+xticks(cumdate);
+xticklabels(1:24);
+set(gca,"YScale","log");
+title("DC14-DC10");
