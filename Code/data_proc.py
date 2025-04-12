@@ -13,7 +13,7 @@ The usage of the tensor is as follows:
 '''
 
 #raw data
-raw = pd.read_excel("data.xlsx")
+raw = pd.read_excel("code/data.xlsx")
 
 #max stations (DC1 - DC81)
 N = 81
@@ -46,5 +46,4 @@ for _, row in new.iterrows():
         if np.isnan(tensor_2022[day_idx, i, j]):
             tensor_2022[day_idx, i, j] = 0
         tensor_2022[day_idx, i, j] += vol
-
 
