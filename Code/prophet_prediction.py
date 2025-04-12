@@ -74,24 +74,15 @@ for route in predictions:
         
         #remove outlier
         data = outlier_filter(data)
-
-        #set limit
-        historical_peak = data['y'].quantile(0.85)
-        cap_value = historical_peak * 1.8 if historical_peak > 0 else 1
-        data["cap"] = cap_value
-        data["floor"] = data['y'].min() * 0.7
         
         #model construction
         model = Prophet(
-            growth = "logistic",
+            growth = "flat",
             seasonality_mode = "multiplicative",
-            changepoint_prior_scale = 0.002, 
-            seasonality_prior_scale = 25, 
-            yearly_seasonality = 18, 
-            weekly_seasonality = 2, 
-            daily_seasonality = False,
-            holidays_prior_scale = 18, 
-            mcmc_samples = 0             
+            changepoint_prior_scale = 0.001, 
+            seasonality_prior_scale = 15, 
+            yearly_seasonality = 12, 
+            holidays_prior_scale = 10,              
         )
         
         #traditional holidays and custom holidays
@@ -109,9 +100,9 @@ for route in predictions:
         })
         model.holidays = pd.concat([model.holidays, custom_holidays])
         
-        #strengthen seasonality
+        #set seasonality
         model.add_seasonality(
-            name='quarter',
+            name = "quarter",
             period = 91.25,
             fourier_order = 10,
             prior_scale = 15
@@ -120,14 +111,9 @@ for route in predictions:
         
         #predictions generation
         future = model.make_future_dataframe(periods = 365)
-        future["cap"] = cap_value
-        future["floor"] = data['floor'].min()
         forecast = model.predict(future)
-        min_volume = data['y'].min() * 0.5
-        forecast[["yhat", "yhat_lower", "yhat_upper"]] = forecast[
-            ["yhat", "yhat_lower", "yhat_upper"]
-        ].clip(lower=min_volume)
-        
+        forecast[['yhat', 'yhat_lower', 'yhat_upper']] = forecast[['yhat', 'yhat_lower', 'yhat_upper']].clip(lower = 0)
+
         #store results
         predictions[route][year_key] = {
             "model": model,
@@ -160,10 +146,7 @@ if __name__ == "__main__":
 
             forecast_start = forecast['ds'].max() - pd.DateOffset(days = 365)
             current_ax.axvline(x = forecast_start, color = 'purple', 
-                             linestyle = '--', alpha = 0.7, label = 'Forecast Start')
-
-            current_ax.axhline(y = data['floor'].min(), color = 'grey',
-                             linestyle = ':', alpha = 0.5, label = 'Minimum Limit')
+                                linestyle = '--', alpha = 0.7, label = 'Forecast Start')
             
             plt.title(f"{route} Volume Prediction ({year_key} Basis)")
             plt.xlabel("Date")
